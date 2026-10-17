@@ -12,6 +12,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+add_filter(
+	'template_include',
+	function ( $template ) {
+		if ( ! function_exists( 'WC' ) ) {
+			return $template;
+		}
+		if ( is_cart() ) {
+			return KULIER_DIR . '/cart.php';
+		}
+		if ( is_checkout() ) {
+			return KULIER_DIR . ( is_order_received_page() ? '/thankyou.php' : '/checkout.php' );
+		}
+		return $template;
+	},
+	99
+);
+
 // Theme supports WooCommerce.
 add_theme_support( 'woocommerce' );
 add_theme_support( 'wc-product-gallery-zoom' );
@@ -30,11 +47,11 @@ add_action(
 	}
 );
 
-// Shop page: 3-column editorial grid, standard pagination.
+// Two-column collection rows, with native WooCommerce pagination.
 add_filter(
 	'loop_shop_columns',
 	function () {
-		return 3;
+		return 2;
 	}
 );
 
@@ -45,12 +62,12 @@ add_filter(
 	}
 );
 
-// Related products: 3 columns like the catalog rows.
+// Related products use the same two-column rhythm as the catalog.
 add_filter(
 	'woocommerce_output_related_products_args',
 	function ( $args ) {
-		$args['posts_per_page'] = 3;
-		$args['columns']        = 3;
+		$args['posts_per_page'] = 2;
+		$args['columns']        = 2;
 		return $args;
 	}
 );
@@ -70,8 +87,9 @@ remove_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_ad
 add_action(
 	'woocommerce_before_shop_loop_item_title',
 	function () {
+		global $product;
 		echo '<div class="kw-card-media">';
-		woocommerce_template_loop_product_thumbnail();
+		printf( '<img src="%s" alt="%s" width="1200" height="896" loading="lazy" decoding="async">', esc_url( kulier_product_image( $product ) ), esc_attr( $product->get_name() ) );
 		echo '</div>';
 	},
 	10
@@ -90,18 +108,37 @@ add_action(
 		echo '<div class="kw-card-price">';
 		woocommerce_template_loop_price();
 		echo '</div>';
-		echo '<div class="kw-card-stock">';
+		$stock_label = '';
 		if ( $product->is_in_stock() ) {
 			$stock = $product->get_stock_quantity();
 			if ( $stock ) {
-				echo '<span class="stock">' . esc_html( sprintf( __( 'Stok: %s unit', 'kulier-wood' ), $stock ) ) . '</span>';
+				$stock_label = sprintf( __( 'Stok: %s unit', 'kulier-wood' ), $stock );
 			}
 		} else {
-			echo '<span class="stock kw-out-of-stock">' . esc_html__( 'Habis', 'kulier-wood' ) . '</span>';
+			$stock_label = __( 'Habis', 'kulier-wood' );
 		}
-		echo '</div>';
+		if ( $stock_label ) {
+			echo '<div class="kw-card-stock"><span class="stock">' . esc_html( $stock_label ) . '</span></div>';
+		}
 	},
 	10
+);
+
+add_filter(
+	'woocommerce_single_product_image_thumbnail_html',
+	function ( $html, $attachment_id ) {
+		global $product;
+		if ( ! $product || (int) $product->get_image_id() !== (int) $attachment_id ) {
+			return $html;
+		}
+		$source = kulier_product_image( $product, 'full' );
+		if ( $source === wp_get_attachment_image_url( $attachment_id, 'full' ) ) {
+			return $html;
+		}
+		return sprintf( '<div data-thumb="%1$s" data-thumb-alt="%2$s" class="woocommerce-product-gallery__image"><a href="%1$s"><img src="%1$s" alt="%2$s" class="wp-post-image" width="1200" height="896" data-src="%1$s" data-large_image="%1$s" data-large_image_width="1200" data-large_image_height="896" fetchpriority="high"></a></div>', esc_url( $source ), esc_attr( $product->get_name() ) );
+	},
+	10,
+	2
 );
 
 // Breadcrumbs: quiet, text-only, matching the design's muted link style.

@@ -16,7 +16,7 @@ woocommerce_breadcrumb();
 </section>
 
 <div class="kw-checkout kw-panel">
-	<?php woocommerce_checkout(); ?>
+	<?php echo do_shortcode( '[woocommerce_checkout]' ); ?>
 </div>
 
 <?php get_footer(); ?>

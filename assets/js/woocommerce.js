@@ -21,8 +21,13 @@
 	});
 
 	// Keyboard focus on variation/gallery thumbnails.
-	document.querySelectorAll('.flex-control-thumbs img').forEach(function (thumb) {
+	function prepareThumbs() {
+	document.querySelectorAll('.flex-control-thumbs img').forEach(function (thumb, index) {
+		if (thumb.dataset.kwKeyboard) return;
+		thumb.dataset.kwKeyboard = 'true';
 		thumb.setAttribute('tabindex', '0');
+		thumb.setAttribute('role', 'button');
+		thumb.setAttribute('aria-label', thumb.alt || 'View product image ' + (index + 1));
 		thumb.addEventListener('keydown', function (e) {
 			if (e.key === 'Enter' || e.key === ' ') {
 				e.preventDefault();
@@ -30,4 +35,8 @@
 			}
 		});
 	});
+	}
+	prepareThumbs();
+	document.addEventListener('DOMContentLoaded', prepareThumbs);
+	if (window.jQuery) jQuery(document.body).on('wc-product-gallery-after-init', prepareThumbs);
 })();

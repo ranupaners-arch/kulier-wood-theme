@@ -7,7 +7,8 @@
 
 get_header();
 
-$assets = KULIER_URI . '/assets/images';
+$collection_images = array( 'living' => 'generated.jpg', 'dining' => 'generated-9.jpg', 'bedroom' => 'generated-3.jpg', 'custom' => 'generated-7.jpg' );
+$collection_copy   = array( 'living' => 'Objects for relaxed, considered living.', 'dining' => 'Natural character. Shared moments.', 'bedroom' => 'A quiet place to begin and end the day.', 'custom' => 'Furniture shaped around your space.' );
 ?>
 
 <!-- Hero showroom -->
@@ -16,37 +17,37 @@ $assets = KULIER_URI . '/assets/images';
 		<div class="kw-hero__intro">
 			<h1 class="kw-hero__title">Shaped by craft.<br>Designed for living.</h1>
 			<div class="kw-hero__intro-col">
-				<p class="kw-hero__desc"><?php esc_html_e( 'Perabot kayu yang dirancang dengan penuh pertimbangan untuk ruang yang menghargai material, bentuk, dan karakter yang bertahan lama.', 'kulier-wood' ); ?></p>
+				<p class="kw-hero__desc"><?php echo esc_html( get_theme_mod( 'kulier_hero_copy', 'Thoughtfully designed wooden furniture for spaces that value material, form, and lasting character.' ) ); ?></p>
 				<?php kulier_button( __( 'Explore Our Collections', 'kulier-wood' ), get_permalink( wc_get_page_id( 'shop' ) ) ); ?>
 			</div>
 		</div>
 		<div class="kw-hero__media kw-reveal">
 			<?php
-			$hero = get_theme_mod( 'kulier_hero_image' );
+			$hero = kulier_design_image( get_theme_mod( 'kulier_hero_image' ), 'generated.jpg' );
 			if ( $hero ) {
-				printf( '<img src="%s" alt="%s" loading="eager">', esc_url( $hero ), esc_attr__( 'Interior perabot kayu', 'kulier-wood' ) );
+				printf( '<img src="%s" alt="%s" width="1376" height="768" loading="eager" fetchpriority="high">', esc_url( $hero ), esc_attr__( 'Editorial wooden furniture interior', 'kulier-wood' ) );
 			}
 			?>
 		</div>
 	</div>
 	<div class="kw-hero__caption">
-		<p><?php esc_html_e( 'Untuk rumah, perhotelan & ruang yang penuh pertimbangan', 'kulier-wood' ); ?></p>
+		<p>For homes, hospitality &amp; considered spaces</p>
 		<a class="kw-hero__link" href="<?php echo esc_url( home_url( '/#philosophy' ) ); ?>"><?php esc_html_e( 'Discover Our Approach', 'kulier-wood' ); ?></a>
 	</div>
 </section>
 
 <!-- Our studio -->
-<section class="kw-studio">
+<section class="kw-studio" id="studio">
 	<div class="kw-studio__copy">
 		<h2>A considered approach<br>to furniture.</h2>
-		<p class="kw-studio__body"><?php esc_html_e( 'KULIER WOOD mengeksplorasi hubungan antara material alami, bentuk kontemporer, dan ruang yang kita huni. Koleksi kami mengutamakan kejujuran material dan keterampilan tangan.', 'kulier-wood' ); ?></p>
-		<p class="kw-studio__focus"><?php esc_html_e( 'Untuk pemilik rumah, arsitek, dan profesional interior.', 'kulier-wood' ); ?></p>
+		<p class="kw-studio__body"><?php echo esc_html( get_theme_mod( 'kulier_studio_copy', 'KULIER WOOD explores the relationship between natural materials, contemporary forms, and the spaces we inhabit. Our collections bring warmth, clarity, and character to residential and commercial interiors.' ) ); ?></p>
+		<p class="kw-studio__focus">For homeowners, architects and interior professionals.</p>
 	</div>
 	<div class="kw-studio__media kw-reveal">
 		<?php
-		$studio = get_theme_mod( 'kulier_studio_image' );
+		$studio = kulier_design_image( get_theme_mod( 'kulier_studio_image' ), 'generated-5.jpg' );
 		if ( $studio ) {
-			printf( '<img src="%s" alt="%s" loading="lazy">', esc_url( $studio ), esc_attr__( 'Kursi kayu dalam lanskap arsitektural', 'kulier-wood' ) );
+			printf( '<img src="%s" alt="%s" width="1200" height="896" loading="lazy" decoding="async">', esc_url( $studio ), esc_attr__( 'Wooden chair in an architectural setting', 'kulier-wood' ) );
 		}
 		?>
 	</div>
@@ -56,17 +57,10 @@ $assets = KULIER_URI . '/assets/images';
 <section class="kw-collections">
 	<div class="kw-collections__heading">
 		<h2><?php esc_html_e( 'Pieces for spaces that matter.', 'kulier-wood' ); ?></h2>
-		<p><?php esc_html_e( 'Perabot untuk cara kita hidup, berkumpul, dan beristirahat.', 'kulier-wood' ); ?></p>
+		<p>Furniture for the way we live, gather and retreat.</p>
 	</div>
 	<?php
-	$terms = get_terms(
-		array(
-			'taxonomy'   => 'product_cat',
-			'hide_empty' => false,
-			'exclude'    => array( get_term_by( 'slug', 'uncategorized', 'product_cat' ) ? get_term_by( 'slug', 'uncategorized', 'product_cat' )->term_id : 0 ),
-			'number'     => 4,
-		)
-	);
+	$terms = array_slice( kulier_collection_terms(), 0, 4 );
 	if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) :
 		?>
 		<div class="kw-collections__bento">
@@ -76,6 +70,9 @@ $assets = KULIER_URI . '/assets/images';
 				$idx++;
 				$thumb_id = get_term_meta( $term->term_id, 'thumbnail_id', true );
 				$img      = $thumb_id ? wp_get_attachment_image_url( $thumb_id, 'kulier-card' ) : '';
+				if ( isset( $collection_images[ $term->slug ] ) ) {
+					$img = kulier_design_image( $img, $collection_images[ $term->slug ] );
+				}
 				$wide     = ( $idx <= 2 );
 				?>
 				<a class="kw-collection-card<?php echo $wide ? ' is-wide' : ''; ?>" href="<?php echo esc_url( get_term_link( $term ) ); ?>">
@@ -86,15 +83,16 @@ $assets = KULIER_URI . '/assets/images';
 						}
 						?>
 					</div>
-					<div class="kw-collection-card__heading">
+					<div class="kw-collection-card__copy">
 						<h3><?php echo esc_html( $term->name ); ?></h3>
-					</div>
 					<p class="kw-collection-card__desc">
 						<?php
 						$desc = get_theme_mod( 'kulier_cat_desc_' . $term->slug, '' );
-						echo esc_html( $desc ? $desc : wp_strip_all_tags( $term->description ) );
+						echo esc_html( $desc ?: ( $collection_copy[ $term->slug ] ?? wp_strip_all_tags( $term->description ) ) );
 						?>
 					</p>
+					<span class="kw-collection-card__link">Explore Collection</span>
+					</div>
 				</a>
 				<?php
 			endforeach;
@@ -107,20 +105,20 @@ $assets = KULIER_URI . '/assets/images';
 <section class="kw-philosophy" id="philosophy">
 	<div class="kw-philosophy__heading">
 		<h2>Where material<br>meets meaning.</h2>
-		<p><?php esc_html_e( 'Bentuk yang bermakna. Tekstur alami. Ruang yang terasa hangat dan abadi.', 'kulier-wood' ); ?></p>
+		<p>Purposeful forms. Natural textures. Spaces that feel welcoming and enduring.</p>
 	</div>
 	<div class="kw-philosophy__cols">
 		<div class="kw-philosophy__col">
 			<h3>Material</h3>
-			<p><?php esc_html_e( 'Tekstur dan karakter visual kayu, dibiarkan berbicara.', 'kulier-wood' ); ?></p>
+			<p>The texture and visual character of wood, allowed to speak.</p>
 		</div>
 		<div class="kw-philosophy__col">
 			<h3>Form</h3>
-			<p><?php esc_html_e( 'Proporsi seimbang dan siluet kontemporer.', 'kulier-wood' ); ?></p>
+			<p>Balanced proportions and contemporary silhouettes.</p>
 		</div>
 		<div class="kw-philosophy__col">
 			<h3>Function</h3>
-			<p><?php esc_html_e( 'Dirancang sesuai kebutuhan praktis ruang sehari-hari.', 'kulier-wood' ); ?></p>
+			<p>Considered around the practical needs of everyday spaces.</p>
 		</div>
 	</div>
 </section>
@@ -129,7 +127,7 @@ $assets = KULIER_URI . '/assets/images';
 <section class="kw-craft">
 	<div class="kw-craft__media kw-reveal">
 		<?php
-		$craft = get_theme_mod( 'kulier_craft_image' );
+		$craft = kulier_design_image( get_theme_mod( 'kulier_craft_image' ), 'https://images.unsplash.com/photo-1720391793902-06a80038b1ed?auto=format&fit=crop&q=80&w=1080' );
 		if ( $craft ) {
 			printf( '<img src="%s" alt="%s" loading="lazy">', esc_url( $craft ), esc_attr__( 'Detail joinery dan kayu', 'kulier-wood' ) );
 		}
@@ -137,8 +135,8 @@ $assets = KULIER_URI . '/assets/images';
 	</div>
 	<div class="kw-craft__copy">
 		<h2>The beauty is<br>in the details.</h2>
-		<p class="kw-craft__body"><?php esc_html_e( 'Dari karakter kayu hingga proporsi setiap potongan, detail kecil membentuk cara perabot dirasakan.', 'kulier-wood' ); ?></p>
-		<p class="kw-craft__note"><?php esc_html_e( 'Material, finishing, dan spesifikasi dikonfirmasi per inquiry.', 'kulier-wood' ); ?></p>
+		<p class="kw-craft__body"><?php echo esc_html( get_theme_mod( 'kulier_craft_copy', 'From the character of the wood to the proportions of each piece, small details shape the way furniture is experienced.' ) ); ?></p>
+		<p class="kw-craft__note">Materials, finishes and specifications are confirmed per inquiry.</p>
 	</div>
 </section>
 
@@ -146,15 +144,15 @@ $assets = KULIER_URI . '/assets/images';
 <section class="kw-applications">
 	<div class="kw-applications__heading">
 		<h2>Different spaces.<br>The same considered eye.</h2>
-		<p><?php esc_html_e( 'Aplikasi ilustratif. Ketersediaan layanan akan dikonfirmasi.', 'kulier-wood' ); ?></p>
+		<p>Illustrative applications. Service availability to be confirmed.</p>
 	</div>
 	<div class="kw-applications__grid">
 		<?php
 		$apps = array(
-			array( 'Residential', __( 'Rumah & ruang personal', 'kulier-wood' ) ),
-			array( 'Hospitality', __( 'Hotel & retreat', 'kulier-wood' ) ),
-			array( 'Food & Beverage', __( 'Restoran & kafe', 'kulier-wood' ) ),
-			array( 'Commercial', __( 'Kantor & studio', 'kulier-wood' ) ),
+			array( 'Residential', 'Homes & personal spaces' ),
+			array( 'Hospitality', 'Hotels & retreats' ),
+			array( 'Food & Beverage', 'Restaurants & cafés' ),
+			array( 'Commercial', 'Offices & studios' ),
 		);
 		foreach ( $apps as $app ) :
 			?>
@@ -169,20 +167,6 @@ $assets = KULIER_URI . '/assets/images';
 </section>
 
 <!-- Contact / project inquiry -->
-<section class="kw-contact">
-	<div class="kw-contact__invite">
-		<h2><?php esc_html_e( 'Let’s create something meaningful for your space.', 'kulier-wood' ); ?></h2>
-		<p><?php esc_html_e( 'Untuk rumah, bisnis, atau proyek interior Anda berikutnya. Sampaikan rencana Anda.', 'kulier-wood' ); ?></p>
-		<?php kulier_button( __( 'Discuss Your Project', 'kulier-wood' ), home_url( '/#contact' ), 'kw-btn--light' ); ?>
-		<span class="kw-contact__alt"><?php esc_html_e( 'Contact Our Team', 'kulier-wood' ); ?></span>
-	</div>
-	<div class="kw-contact__details">
-		<p>[NOMOR WHATSAPP]</p>
-		<p>[BISNIS EMAIL]</p>
-		<p>[ALAMAT PERUSAHAAN]</p>
-		<p>[LOKASI PERUSAHAAN]</p>
-		<p class="kw-contact__note"><?php esc_html_e( 'Demo: tindakan kontak memerlukan detail bisnis terverifikasi.', 'kulier-wood' ); ?></p>
-	</div>
-</section>
+<?php get_template_part( 'template-parts/contact' ); ?>
 
 <?php get_footer(); ?>

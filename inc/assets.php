@@ -23,19 +23,17 @@ add_action(
 		wp_enqueue_style( 'kulier-main', KULIER_URI . '/assets/css/main.css', array( 'kulier-fonts' ), KULIER_VERSION );
 		wp_enqueue_style( 'kulier-woo', KULIER_URI . '/assets/css/woocommerce.css', array( 'kulier-main' ), KULIER_VERSION );
 
+		wp_enqueue_script( 'kulier-main', KULIER_URI . '/assets/js/main.js', array( 'jquery' ), KULIER_VERSION, true );
 		wp_localize_script(
 			'kulier-main',
 			'kulierData',
 			array(
-				'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
+				'ajaxUrl'   => admin_url( 'admin-ajax.php', 'relative' ),
 				'cartUrl'   => function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : '',
-				'cartNonce' => function_exists( 'wp_create_nonce' ) ? wp_create_nonce( 'kulier-cart' ) : '',
 			)
 		);
 
-		wp_enqueue_script( 'kulier-main', KULIER_URI . '/assets/js/main.js', array(), KULIER_VERSION, true );
-
-		if ( is_woocommerce() || is_cart() || is_checkout() ) {
+		if ( function_exists( 'is_woocommerce' ) && ( is_woocommerce() || is_cart() || is_checkout() ) ) {
 			wp_enqueue_script( 'kulier-woo', KULIER_URI . '/assets/js/woocommerce.js', array( 'kulier-main' ), KULIER_VERSION, true );
 		}
 	}

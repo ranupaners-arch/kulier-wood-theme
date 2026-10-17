@@ -6,13 +6,14 @@
  */
 
 get_header();
+woocommerce_output_all_notices();
 
 while ( have_posts() ) :
 	the_post();
 	global $product;
 	?>
 
-	<div class="kw-detail">
+	<div <?php wc_product_class( 'kw-detail', $product ); ?>>
 		<div class="kw-detail__nav">
 			<a href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>"><?php esc_html_e( 'Back to Collections', 'kulier-wood' ); ?></a>
 		</div>
@@ -28,7 +29,7 @@ while ( have_posts() ) :
 					$terms = get_the_terms( get_the_ID(), 'product_cat' );
 					if ( $terms && ! is_wp_error( $terms ) ) {
 						$cat = array_shift( $terms );
-						printf( '%s · %s', esc_html( $cat->name ), esc_html__( 'Produk demonstrasi', 'kulier-wood' ) );
+						printf( '%s Collection · %s', esc_html( $cat->name ), esc_html__( 'Demonstration product', 'kulier-wood' ) );
 					}
 					?>
 				</p>
@@ -36,19 +37,14 @@ while ( have_posts() ) :
 				<div class="kw-detail__desc"><?php the_excerpt(); ?></div>
 
 				<div class="kw-detail__specs">
-					<?php if ( $product->get_sku() ) : ?>
-						<div class="kw-spec"><p class="kw-spec__label">SKU</p><p class="kw-spec__value"><?php echo esc_html( $product->get_sku() ); ?></p></div>
-					<?php endif; ?>
-					<div class="kw-spec">
-						<p class="kw-spec__label"><?php esc_html_e( 'Ketersediaan', 'kulier-wood' ); ?></p>
-						<p class="kw-spec__value"><?php echo wp_kses_post( wc_get_stock_html( $product ) ); ?></p>
-					</div>
-					<div class="kw-spec">
-						<p class="kw-spec__label"><?php esc_html_e( 'Harga', 'kulier-wood' ); ?></p>
-						<p class="kw-spec__value kw-detail__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></p>
-					</div>
 					<?php
 					$attributes = $product->get_attributes();
+					if ( ! $attributes ) :
+						$specs = array( 'Product type' => $product->get_slug() === 'sora-lounge-chair' ? 'Lounge chair' : '[To be confirmed]', 'Material & finish' => '[To be confirmed]', 'Dimensions' => '[To be confirmed]' );
+						foreach ( $specs as $label => $value ) : ?>
+							<div class="kw-spec"><p class="kw-spec__label"><?php echo esc_html( $label ); ?></p><p class="kw-spec__value"><?php echo esc_html( $value ); ?></p></div>
+						<?php endforeach;
+					endif;
 					foreach ( $attributes as $attribute ) :
 						if ( $attribute->get_visible() ) :
 							?>
@@ -67,13 +63,18 @@ while ( have_posts() ) :
 					?>
 				</div>
 
-				<div class="kw-detail__cart">
-					<?php woocommerce_template_single_add_to_cart(); ?>
-				</div>
+				<?php kulier_button( __( 'Inquire About This Piece', 'kulier-wood' ), kulier_contact_url() ?: home_url( '/#contact' ) ); ?>
 
-				<p class="kw-detail__note"><?php esc_html_e( 'Gambar ilustratif dan produk fiktif. Spesifikasi dikonfirmasi per inquiry.', 'kulier-wood' ); ?></p>
+				<div class="kw-detail__commerce">
+					<p class="kw-detail__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></p>
+					<?php echo wp_kses_post( wc_get_stock_html( $product ) ); ?>
+					<div class="kw-detail__cart">
+					<?php woocommerce_template_single_add_to_cart(); ?>
+					</div>
+				</div>
 			</div>
 		</div>
+		<p class="kw-detail__note">Illustrative image and fictional product. Materials, finishes and specifications are confirmed per inquiry.</p>
 
 		<div class="kw-detail__content">
 			<?php woocommerce_output_product_data_tabs(); ?>

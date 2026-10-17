@@ -16,19 +16,7 @@ woocommerce_breadcrumb();
 </section>
 
 <div class="kw-cart kw-panel">
-	<?php
-	if ( WC()->cart->is_empty() ) :
-		?>
-		<div class="kw-empty">
-			<h2><?php esc_html_e( 'Keranjang masih kosong.', 'kulier-wood' ); ?></h2>
-			<p><?php esc_html_e( 'Jelajahi koleksi untuk menemukan perabot yang tepat.', 'kulier-wood' ); ?></p>
-			<?php kulier_button( __( 'Lanjut Belanja', 'kulier-wood' ), get_permalink( wc_get_page_id( 'shop' ) ) ); ?>
-		</div>
-		<?php
-	else :
-		wc_get_template( 'cart/cart.php' );
-	endif;
-	?>
+	<?php echo do_shortcode( '[woocommerce_cart]' ); ?>
 </div>
 
 <?php get_footer(); ?>

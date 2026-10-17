@@ -15,10 +15,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 function kulier_footer_fallback() {
 	$links = array(
 		array( __( 'Home', 'kulier-wood' ), home_url( '/' ) ),
-		array( __( 'Collections', 'kulier-wood' ), get_permalink( wc_get_page_id( 'shop' ) ) ),
-		array( __( 'Journal', 'kulier-wood' ), get_permalink( get_option( 'page_for_posts' ) ) ),
-		array( __( 'Keranjang', 'kulier-wood' ), wc_get_cart_url() ),
-		array( __( 'Kontak', 'kulier-wood' ), home_url( '/#contact' ) ),
+		array( __( 'Collections', 'kulier-wood' ), kulier_shop_url() ),
+		array( __( 'Journal', 'kulier-wood' ), kulier_journal_url() ),
+		array( __( 'About', 'kulier-wood' ), home_url( '/#studio' ) ),
+		array( __( 'Contact', 'kulier-wood' ), home_url( '/#contact' ) ),
 	);
 	foreach ( $links as $link ) {
 		printf( '<a href="%s">%s</a>', esc_url( $link[1] ), esc_html( $link[0] ) );
